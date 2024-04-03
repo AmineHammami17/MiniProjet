@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const Level = require('../models/level');
+const Level = require('../models/Level');
 
 
 // @desc  Get list of levels
