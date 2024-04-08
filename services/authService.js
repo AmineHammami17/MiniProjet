@@ -21,37 +21,40 @@ exports.signup = asyncHandler(async(req,res,next)=>{
         role:req.body.role,
         
     });
-    //generate token 
-    const token = jwt.sign({userId : user._id , userRole:user._role}
-        ,process.env.JWT_SECRET_KEY
-        ,{expiresIn:"7d"});
-        
-    res.status(201).json({data:user,token});
+    const token = jwt.sign(
+      { userId: user._id, userRole: user.role },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "7d" }
+  );
+
+  res.status(201).json({ data: user, token });
 
 });
 
 
 
 
-// @desc  login user 
+// @desc  Login user 
 // @route PUT  /api/v1/auth/login
 // @access public
-exports.login=asyncHandler(async(req,res,next)=>{
+exports.login = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
 
-    const user = await User.findOne({email:req.body.email});
-    if(!user || !(await bcrypt.compare(req.body.password,user.password))){
-        return next(new ApiError("Incorrect email or password",401));
-    }
-    const token = jwt.sign({userId : user._id , userRole:user._role}
-        ,process.env.JWT_SECRET_KEY
-        ,{expiresIn:"7d"});
-    
-    res.status(200).json({data:user,token});
+  const user = await User.findOne({ email });
 
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+      return next(new ApiError("Invalid email or password", 401));
+  }
 
+  const token = jwt.sign(
+      { userId: user._id, userRole: user.role },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "7d" }
+  );
+
+  res.status(200).json({ data: user, token });
 });
 
-//PROTECT ROUTES
 exports.protect = asyncHandler(async(req,res,next)=>{
     
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
@@ -76,45 +79,40 @@ exports.protect = asyncHandler(async(req,res,next)=>{
 // @route   POST /api/v1/auth/forgotPassword
 // @access  Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      return next(
-        new ApiError(`There is no user with that email ${req.body.email}`, 404)
-      );
-    }
-    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const hashedResetCode = crypto
-      .createHash('sha256')
-      .update(resetCode)
-      .digest('hex');
-  
-    user.passwordResetCode = hashedResetCode;
-    user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-    user.passwordResetVerified = false;
-  
-    await user.save();
-  
-    const message = `Hi ${user.name},\n We received a request to reset the password on your ISSATSO Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n ISSATSO Adiministration`;
-    try {
-      await sendEmail({
-        email: user.email,
-        subject: 'Your password reset code (valid for 10 min)',
-        message,
-      });
-    } catch (err) {
-      user.passwordResetCode = undefined;
-      user.passwordResetExpires = undefined;
-      user.passwordResetVerified = undefined;
-  
-      await user.save();
-      return next(new ApiError('There is an error in sending email', 500));
-    }
-  
-    res
-      .status(200)
-      .json({ status: 'Success', message: 'Reset code sent to email' });
-  });
-  
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: `There is no user with the email: ${email}` });
+  }
+
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashedResetCode = crypto.createHash('sha256').update(resetCode).digest('hex');
+
+  user.passwordResetCode = hashedResetCode;
+  user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  user.passwordResetVerified = false;
+
+  await user.save();
+
+  const message = `Hi ${user.name},\n We received a request to reset the password on your ISSATSO Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n ISSATSO Administration`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Your password reset code (valid for 10 min)',
+      message,
+    });
+  } catch (err) {
+    // Handle email sending error here if needed
+    console.error('Error sending email:', err);
+    return res.status(500).json({ message: 'There was an error sending the email' });
+  }
+
+  res.status(200).json({ status: 'Success', message: 'Reset code sent to email' });
+});
+
+
 
   // @desc    Verify password reset code
 // @route   POST /api/v1/auth/verifyResetCode

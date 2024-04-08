@@ -39,9 +39,9 @@ exports.updateUserValidator = [
 
 exports.updateUserPasswordValidator =[
     check('id').isMongoId().withMessage("Invalid user id format"),
-    body("currentPassword").notEmpty().withMessage("You must enter your current password"),
-    body("passwordConfirm").notEmpty().withMessage("You must confirm your password"),
-    body("password").notEmpty().withMessage("You must enter new. password").custom(async (val,{req})=>{
+    check("currentPassword").notEmpty().withMessage("You must enter your current password"),
+    check("passwordConfirm").notEmpty().withMessage("You must confirm your password"),
+    check("password").notEmpty().withMessage("You must enter new. password").custom(async (val,{req})=>{
         const user = await User.findById(req.params.id);
         if(!user){
             throw new Error("user doesn't exist for this id ");

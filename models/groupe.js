@@ -4,7 +4,6 @@ const groupeSchema = new mongoose.Schema({
     number : {
         type : String,
         required:[true,'number is required'],
-        unique: [true,'number must be unique'],
     },
     level : {
         type: mongoose.Schema.ObjectId,
