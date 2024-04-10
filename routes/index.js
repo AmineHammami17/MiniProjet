@@ -11,7 +11,8 @@ const mountRoutes = (app) => {
     app.use('/api/v1/users',userRoute);
     app.use('/api/v1/auth',authRoute);
     app.use('/api/v1/levels',levelRoute);
-    app.use('api/v1/groups',groupeRoute);
+    app.use('/api/v1/groups',groupeRoute);
+    
 
 
 

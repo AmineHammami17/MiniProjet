@@ -63,3 +63,14 @@ exports.deleteLevel = asyncHandler(async(req,res)=>{
         res.status(200).json({ msg: 'Level deleted successfully' });
     }
 });
+
+
+// @desc  Get levels by speciality ID
+// @route GET /api/v1/levels/specialities/:specialityId
+// @access Public
+exports.getLevelsBySpecialityId = asyncHandler(async (req, res) => {
+    const specialityId = req.params.specialityId;
+    const levels = await Level.find({ speciality: specialityId })
+        .populate('speciality', 'name');
+    res.status(200).json({ data: levels });
+});

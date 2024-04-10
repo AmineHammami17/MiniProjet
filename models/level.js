@@ -4,6 +4,7 @@ const levelSchema = new mongoose.Schema({
     name : {
         type : String,
         required:[true,'Name is required'],
+        
     },
     speciality : {
         type: mongoose.Schema.ObjectId,

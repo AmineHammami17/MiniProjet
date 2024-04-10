@@ -4,7 +4,8 @@ const {
     getGroupeById,
     createGroupe,
     updateGroupe,
-    deleteGroupe
+    deleteGroupe,
+    getGroupsByLevelId
 } = require('../services/groupeService');
 
 const {
@@ -23,5 +24,8 @@ router.route('/:id')
     .get(getGroupeById)
     .put(updateGroupeValidator, updateGroupe)
     .delete(deleteGroupeValidator, deleteGroupe);
+
+router.get('/levels/:levelId/groups', getGroupsByLevelId);
+
 
 module.exports = router;

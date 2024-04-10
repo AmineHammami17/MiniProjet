@@ -4,12 +4,14 @@ const {
     getLevelById,
     createLevel,
     updateLevel,
-    deleteLevel
+    deleteLevel,
+    getLevelsBySpecialityId 
 } = require('../services/levelService');
 
 const router = express.Router();
 
 router.route('/').get(getLevels).post(createLevel);
 router.route('/:id').get(getLevelById).put(updateLevel).delete(deleteLevel);
+router.get('/specialities/:specialityId/levels', getLevelsBySpecialityId);
 
 module.exports = router;

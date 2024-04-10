@@ -11,17 +11,35 @@ const sendEmail = require('../utils/sendEmail');
 // @access public
 
 exports.signup = asyncHandler(async(req,res,next)=>{
-    //create user
-    const user = await User.create({
-        name:req.body.name,
-        lastname:req.body.lastname,
-        CIN:req.body.CIN,
-        email:req.body.email,
-        password:req.body.password,
-        role:req.body.role,
-        
-    });
-    const token = jwt.sign(
+  // Destructure request body
+  const { name, lastname, email, password, role, UniversitySituation, internships, speciality, level, group } = req.body;
+
+  // Create user
+  const user = await User.create({
+      name,
+      lastname,
+      email,
+      password,
+      role,
+  });
+
+  let createdProfile;
+  if (role === 'student') {
+      createdProfile = await Student.create({
+          UniversitySituation,
+          internships,
+          speciality,
+          level,
+          group,
+          user: user._id, 
+      });
+  } else if (role === 'teacher') {
+      createdProfile = await Teacher.create({
+          user: user._id, 
+      });
+  }
+
+  const token = jwt.sign(
       { userId: user._id, userRole: user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "7d" }
