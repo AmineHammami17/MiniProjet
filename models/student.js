@@ -20,7 +20,7 @@ const studentSchema = new mongoose.Schema({
     },
     group: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Group',
+        ref: 'Groupe',
         required: true,
     },
 
@@ -28,6 +28,13 @@ const studentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
+        validate: {
+            validator: async function(userId) {
+                const user = await mongoose.model('User').findById(userId);
+                return user && user.role === 'student';
+            },
+            message: 'User must have the role "student"',
+        }
     }
 });
 

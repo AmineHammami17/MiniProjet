@@ -4,52 +4,78 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
 const { token } = require("morgan");
 const sendEmail = require('../utils/sendEmail');
+const Student = require('../models/student');
+const Teacher = require('../models/teacher');
 
 
-// @desc  signup user
+// @desc  Signup user
 // @route PUT  /api/v1/auth/signup
-// @access public
+// @access Public
+exports.signup = asyncHandler(async (req, res, next) => {
+  try {
+    const { name, lastname, email, CIN, password, role } = req.body;
 
-exports.signup = asyncHandler(async(req,res,next)=>{
-  // Destructure request body
-  const { name, lastname, email, password, role, UniversitySituation, internships, speciality, level, group } = req.body;
-
-  // Create user
-  const user = await User.create({
+    // Create user
+    const user = await User.create({
       name,
       lastname,
       email,
+      CIN,
       password,
       role,
-  });
+    });
 
-  let createdProfile;
-  if (role === 'student') {
+    // Log user creation
+    console.log('User created:', user);
+
+    let createdProfile;
+
+    if (role === 'student') {
+      // Check if required fields are present for student profile
+      const { speciality, level, group } = req.body;
+      if (!speciality || !level || !group) {
+        await user.remove();
+        console.error('Missing required fields for student profile');
+        return res.status(400).json({ message: 'Missing required fields for student profile' });
+      }
+
+      // Create student profile
       createdProfile = await Student.create({
-          UniversitySituation,
-          internships,
-          speciality,
-          level,
-          group,
-          user: user._id, 
+        UniversitySituation: req.body.UniversitySituation,
+        internships: req.body.internships,
+        speciality,
+        level,
+        group,
+        user: user._id,
       });
-  } else if (role === 'teacher') {
-      createdProfile = await Teacher.create({
-          user: user._id, 
-      });
-  }
 
-  const token = jwt.sign(
+      // Log student creation
+      console.log('Student profile created:', createdProfile);
+    } else if (role === 'teacher') {
+      // Create teacher profile
+      createdProfile = await Teacher.create({
+        user: user._id,
+      });
+
+      // Log teacher creation
+      console.log('Teacher profile created:', createdProfile);
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
       { userId: user._id, userRole: user.role },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "7d" }
-  );
+      { expiresIn: '7d' }
+    );
 
-  res.status(201).json({ data: user, token });
-
+    // Send response with user data, created profile data, and token
+    res.status(201).json({ data: { user, profile: createdProfile }, token });
+  } catch (error) {
+    console.error('Error creating user profile:', error);
+    // Return error response
+    res.status(500).json({ message: 'Error creating user profile', error });
+  }
 });
-
-
 
 
 // @desc  Login user 
@@ -122,7 +148,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       message,
     });
   } catch (err) {
-    // Handle email sending error here if needed
     console.error('Error sending email:', err);
     return res.status(500).json({ message: 'There was an error sending the email' });
   }
