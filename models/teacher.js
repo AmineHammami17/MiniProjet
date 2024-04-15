@@ -18,7 +18,7 @@ const teacherSchema = new mongoose.Schema({
         ref: 'Department',
         required: true,
     },
-    title:String,
+    title: String,
 });
 
 const Teacher = mongoose.model('Teacher', teacherSchema);

@@ -5,6 +5,7 @@ const authRoute = require('./authRoute');
 const levelRoute = require('./levelRoute');
 const groupeRoute = require('./groupeRoute');
 const studentRoute = require('./studentRoute');
+const teacherRoute = require('./teacherRoute');
 
 const mountRoutes = (app) => {
     app.use('/api/v1/departments', departmentRoute);
@@ -14,6 +15,9 @@ const mountRoutes = (app) => {
     app.use('/api/v1/levels',levelRoute);
     app.use('/api/v1/groups',groupeRoute);
     app.use('/api/v1/students',studentRoute);
+    app.use('/api/v1/teachers',teacherRoute);
+    app.use('/api/v1/subjects',subjectRoute);
+
 
 
 
