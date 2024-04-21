@@ -88,26 +88,31 @@ exports.getSubjectsByTeacher = async (req, res) => {
 // @route   GET /api/v1/subjects/:subjectId/teachers
 // @access  Public
 
-  exports.getTeachersBySubject = async (req, res) => {
-    try {
-      const { subjectId } = req.params;
-  
-      const subject = await Subject.findById(subjectId);
-      if (!subject) {
-        return res.status(404).json({ message: 'Subject not found' });
-      }
-  
-      const teachings = await Teaching.find({ subject: subjectId });
-  
-      const teacherIds = teachings.map(teaching => teaching.teacher);
-  
-      const teachers = await Teacher.find({ _id: { $in: teacherIds } });
-  
-      res.status(200).json({ data: teachers });
-    } catch (error) {
-      console.error('Error retrieving teachers:', error);
-      res.status(500).json({ message: 'Error retrieving teachers', error });
+exports.getTeachersBySubject = asyncHandler(async (req, res) => {
+  try {
+    const { subjectId } = req.params;
+
+    const subject = await Subject.findById(subjectId);
+    if (!subject) {
+      return res.status(404).json({ message: 'Subject not found' });
     }
-  };
+
+    const teachings = await Teaching.find({ subject: subjectId });
+
+    const teacherIds = teachings.map(teaching => teaching.teacher);
+
+    const teachers = await Teacher.find({ _id: { $in: teacherIds } })
+      .populate({
+        path: 'user',
+        select: 'name lastname' 
+      });
+
+    res.status(200).json({ data: teachers });
+  } catch (error) {
+    console.error('Error retrieving teachers:', error);
+    res.status(500).json({ message: 'Error retrieving teachers', error });
+  }
+});
+
   
   

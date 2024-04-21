@@ -10,10 +10,10 @@ const subjectSchema = new mongoose.Schema({
         type: String,
         unique: true
     },
-    description: {
+    TeachingUnit: {
+        required: [true, 'Teaching unit is required'],
         type: String
     },
-
     credits: {
         type: Number,
         required: [true, 'Credits is required']
@@ -21,9 +21,19 @@ const subjectSchema = new mongoose.Schema({
     coefficient: {
         type: Number,
         required: [true, 'Coefficient is required']
+    },
+    TPHours: {
+        type: Number,
+        default: 0
+    },
+    CoursHours: {
+        type: Number,
+        default: 0
+    },
+    TDHours: {
+        type: Number,
+        default: 0
     }
-
-
 });
 
 const Subject = mongoose.model('Subject', subjectSchema);

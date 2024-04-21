@@ -8,9 +8,14 @@ const teachingSchema = new mongoose.Schema({
     subject: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Subject'
+    },
+    type: {
+        type: String,
+        enum: ['TP', 'TD', 'Cours'],
+        required: true
     }
 });
 
-const teachingModel = mongoose.model('Teaching', teachingSchema);
+const Teaching = mongoose.model('Teaching', teachingSchema);
 
-module.exports = teachingModel;
+module.exports = Teaching;

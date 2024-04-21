@@ -5,7 +5,16 @@ const asyncHandler = require('express-async-handler');
 // @route   GET /api/v1/teachings
 // @access  Public
 exports.getTeachings = asyncHandler(async (req, res) => {
-  const teachings = await Teaching.find();
+  const teachings = await Teaching.find()
+    .populate({
+      path: 'teacher',
+      populate: {
+        path: 'user',
+        select: 'name lastname' 
+      }
+    })
+    .populate('subject', 'name code'); 
+  
   res.status(200).json({ data: teachings });
 });
 
@@ -13,7 +22,16 @@ exports.getTeachings = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/teachings/:id
 // @access  Public
 exports.getTeachingById = asyncHandler(async (req, res) => {
-  const teaching = await Teaching.findById(req.params.id);
+  const teaching = await Teaching.findById(req.params.id)
+    .populate({
+      path: 'teacher',
+      populate: {
+        path: 'user',
+        select: 'name lastname' 
+      }
+    })
+    .populate('subject', 'name'); 
+  
   if (!teaching) {
     res.status(404).json({ message: 'Teaching not found' });
   } else {

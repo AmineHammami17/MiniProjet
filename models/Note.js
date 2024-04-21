@@ -25,7 +25,6 @@ const noteSchema = new mongoose.Schema({
     },
     average: {
         type: Number,
-        required: true,
     },
 });
 
