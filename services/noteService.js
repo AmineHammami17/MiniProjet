@@ -5,7 +5,18 @@ const asyncHandler = require('express-async-handler');
 // @route   GET /api/v1/notes
 // @access  Public
 exports.getNotes = asyncHandler(async (req, res) => {
-  const notes = await Note.find();
+  const notes = await Note.find()
+    .populate({
+      path: 'student',
+      select: '-internships -UniversitySituation',
+      populate: [
+        { path: 'user', select: 'name lastname' },
+        { path: 'level' },
+        { path: 'speciality',select:'-abbreviation -department' },
+        { path: 'group' }
+      ]
+    })
+    .populate('subject', ' name');
   res.status(200).json({ data: notes });
 });
 
@@ -13,7 +24,18 @@ exports.getNotes = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/notes/:id
 // @access  Public
 exports.getNoteById = asyncHandler(async (req, res) => {
-  const note = await Note.findById(req.params.id);
+  const note = await Note.findById(req.params.id)    .populate({
+    path: 'student',
+    select: '-internships -UniversitySituation',
+    populate: [
+      { path: 'user', select: 'name lastname' },
+      { path: 'level' },
+      { path: 'speciality',select:'-abbreviation -department' },
+      { path: 'group' }
+    ]
+  })
+  .populate('subject', ' name');
+;
   if (!note) {
     res.status(404).json({ message: 'Note not found' });
   } else {
@@ -65,8 +87,18 @@ exports.getNotesForStudent = async (req, res) => {
     try {
       const { studentId } = req.params;
   
-      const notes = await Note.find({ student: studentId });
-  
+      const notes = await Note.find({ student: studentId })    .populate({
+        path: 'student',
+        select: '-internships -UniversitySituation',
+        populate: [
+          { path: 'user', select: 'name lastname' },
+          { path: 'level' },
+          { path: 'speciality',select:'-abbreviation -department' },
+          { path: 'group' }
+        ]
+      })
+      .populate('subject', ' name');
+
       res.status(200).json({ data: notes });
     } catch (error) {
       console.error('Error retrieving notes:', error);

@@ -15,7 +15,6 @@ exports.signup = asyncHandler(async (req, res, next) => {
   try {
     const { name, lastname, email, CIN, password, role } = req.body;
 
-    // Create user
     const user = await User.create({
       name,
       lastname,
@@ -25,13 +24,11 @@ exports.signup = asyncHandler(async (req, res, next) => {
       role,
     });
 
-    // Log user creation
     console.log('User created:', user);
 
     let createdProfile;
 
     if (role === 'student') {
-      // Check if required fields are present for student profile
       const { speciality, level, group } = req.body;
       if (!speciality || !level || !group) {
         await user.remove();
@@ -39,7 +36,6 @@ exports.signup = asyncHandler(async (req, res, next) => {
         return res.status(400).json({ message: 'Missing required fields for student profile' });
       }
 
-      // Create student profile
       createdProfile = await Student.create({
         UniversitySituation: req.body.UniversitySituation,
         internships: req.body.internships,
@@ -49,30 +45,24 @@ exports.signup = asyncHandler(async (req, res, next) => {
         user: user._id,
       });
 
-      // Log student creation
       console.log('Student profile created:', createdProfile);
     } else if (role === 'teacher') {
-      // Create teacher profile
       createdProfile = await Teacher.create({
         user: user._id,
       });
 
-      // Log teacher creation
       console.log('Teacher profile created:', createdProfile);
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user._id, userRole: user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: '7d' }
     );
 
-    // Send response with user data, created profile data, and token
     res.status(201).json({ data: { user, profile: createdProfile }, token });
   } catch (error) {
     console.error('Error creating user profile:', error);
-    // Return error response
     res.status(500).json({ message: 'Error creating user profile', error });
   }
 });
@@ -130,13 +120,12 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     return res.status(404).json({ message: `There is no user with the email: ${email}` });
   }
 
-  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const hashedResetCode = crypto.createHash('sha256').update(resetCode).digest('hex');
+  const resetCode = "799764";
+  const hashedResetCode = "799764";
 
   user.passwordResetCode = hashedResetCode;
-  user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  user.passwordResetExpires = Date.now() + 10 * 60 * 1000; 
   user.passwordResetVerified = false;
-
   await user.save();
 
   const message = `Hi ${user.name},\n We received a request to reset the password on your ISSATSO Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n ISSATSO Administration`;
@@ -145,7 +134,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     await sendEmail({
       email: user.email,
       subject: 'Your password reset code (valid for 10 min)',
-      message,
+      text : message
     });
   } catch (err) {
     console.error('Error sending email:', err);

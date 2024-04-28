@@ -11,7 +11,6 @@ const sendEmail = async (options) => {
         pass: process.env.EMAIL_PASSWORD,
       },
     });
-
     const mailOpts = {
       from: process.env.EMAIL_FROM,
       to: options.email,
@@ -19,7 +18,7 @@ const sendEmail = async (options) => {
       text: options.text,
       html: options.html,
     };
-
+    console.log(mailOpts)
     await transporter.sendMail(mailOpts);
   } catch (error) {
     console.error('Error sending email:', error);
